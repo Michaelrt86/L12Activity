@@ -14,9 +14,9 @@ spark = glueContext.spark_session
 job = Job(glueContext)
 
 # --- Define S3 Paths (Updated with your new names) ---
-s3_input_path = "s3://handsonfinallanding/"
-s3_processed_path = "s3://handsonfinalprocessed/processed-data/"
-s3_analytics_path = "s3://handsonfinalprocessed/Athena Results/"
+s3_input_path = "s3://handsonfinallanding-mthom217/"
+s3_processed_path = "s3://handsonfinalprocessed-mthom217/processed-data/"
+s3_analytics_path = "s3://handsonfinalprocessed-mthom217/Athena Results/"
 
 # --- Read the data from the S3 landing zone ---
 dynamic_frame = glueContext.create_dynamic_frame.from_options(
@@ -84,8 +84,53 @@ glueContext.write_dynamic_frame.from_options(
 
 # Write the spark queries for following:
 # 2. Date wise review count: his query calculates the total number of reviews submitted per day.
+df_analytics_result = spark.sql("""
+    SELECT 
+        review_date, 
+        COUNT(review_id) as num_reviews
+    FROM product_reviews
+    GROUP BY review_date
+    ORDER BY review_date
+""")
+analytics_result_frame = DynamicFrame.fromDF(df_analytics_result.repartition(1), glueContext, "analytics_df")
+glueContext.write_dynamic_frame.from_options(
+    frame=analytics_result_frame,
+    connection_type="s3",
+    connection_options={"path": s3_analytics_path},
+    format="csv"
+)
+
 # 3. Top 5 Most Active Customers: This query identifies your "power users" by finding the customers who have submitted the most reviews.
+df_analytics_result = spark.sql("""
+    SELECT 
+        customer_id, 
+        COUNT(review_id) as total_reviews
+    FROM product_reviews
+    GROUP BY customer_id
+    ORDER BY total_reviews DESC
+    LIMIT 5
+""")
+analytics_result_frame = DynamicFrame.fromDF(df_analytics_result.repartition(1), glueContext, "analytics_df")
+glueContext.write_dynamic_frame.from_options(
+    frame=analytics_result_frame,
+    connection_type="s3",
+    connection_options={"path": s3_analytics_path},
+    format="csv"
+)
+
 # 4. Overall Rating Distribution: This query shows the count for each star rating (1-star, 2-star, etc.)
-
-
-job.commit()
+df_rating_distribution = spark.sql("""
+    SELECT 
+        rating,
+        COUNT(review_id) AS rating_count
+    FROM product_reviews
+    GROUP BY rating
+    ORDER BY rating
+""")
+analytics_result_frame = DynamicFrame.fromDF(df_analytics_result.repartition(1), glueContext, "analytics_df")
+glueContext.write_dynamic_frame.from_options(
+    frame=analytics_result_frame,
+    connection_type="s3",
+    connection_options={"path": s3_analytics_path},
+    format="csv"
+)

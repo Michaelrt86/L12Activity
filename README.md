@@ -66,7 +66,7 @@ Your Glue job needs permission to read from and write to S3.
 1.  Go to the **AWS Glue** service.
 2.  In the navigation pane, click on **ETL jobs**.
 3.  Select the **Spark script editor** option to create a new job.
-4.  Paste the contents of `src/glue_job_script.py` into the editor.
+4.  Paste the contents of `Glue ETL Script.py` into the editor.
 5.  Go to the **Job details** tab.
 6.  Set the **Name** to `process_reviews_job`.
 7.  Select the `AWSGlueServiceRole-Reviews` **IAM Role** you created in the previous step.
@@ -145,3 +145,7 @@ To avoid any future charges (especially if you're on the Free Tier), be sure to 
 2.  Delete the `start_glue_job_trigger` Lambda function.
 3.  Delete the `process_reviews_job` Glue job.
 4.  Delete the `AWSGlueServiceRole-Reviews` IAM role.
+
+## My reflection
+
+This assignment really helped me understand how triggers worked within Lambda and how you can add triggers on S3 buckets. It was really frustrating because at one point when I was reconfiguring the trigger I deleted it and created another however I had a weird AWS bug called "Ghost Trigger" where it stays in the logs even though AWS can recognize that there is no trigger. Outside of the trigger error I also ran into a 403 Permissions error as well with the IAM roles that were created I tried to add permissions and even checked the JSON provided that gave the proper setup for it. After I had run into all of these issues I did a fresh restart deleting all roles, the S3 buckets, the Glue script, the Lambda functio, trigger and all. After the restart the setup worked completely fine and my script properly outputted everything to the files I had needed. The weird issue is that they were not labeled as CSV files but instead just a "file". Due to this I was pretty confused and thought it was just a checksum that was sent into the bucket however it was the actual CSV file when I opened it up on notepad! All in all I really learned quite a lot about setting up polcies, roles, permissions and more through AWS and I genuinely enjoyed the experience in the end. I attached the outputs from the files into a folder in this repository that showcase the three queries I was supposed to make on top of the example query. 
